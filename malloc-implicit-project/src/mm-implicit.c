@@ -187,6 +187,8 @@
                 set_header(block, size, true);
                 block_t *next_block = (block_t *)((char *)block + size);
                 set_header(next_block, sizeleft, false);
+                if (block == mm_heap_last) 
+                    mm_heap_last = next_block;
             }
         else
         {
@@ -266,11 +268,13 @@
      * byte set to 0, and returns a pointer to it.
      */
     void *mm_calloc(size_t nmemb, size_t size) {
+        if (size != 0 && nmemb > SIZE_MAX / size)
+            return NULL;
         void* nptr = mm_malloc(nmemb * size);
         if(nptr == NULL)
             return NULL;
         memset(nptr, 0, nmemb * size);
-        return nptr;
+        return nptr;    
     }
 
     /**
