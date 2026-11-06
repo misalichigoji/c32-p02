@@ -226,10 +226,10 @@ void *mm_realloc(void *old_ptr, size_t size) {
         return mm_malloc(size);
 
     void * nptr = mm_malloc(size);
-    size_t old_size = get_payload_size(old_ptr);
+    size_t old_size = get_size(block_from_payload(old_ptr));
     if(old_size > size)
         size = old_size;
-    memccpy(nptr, old_ptr, size);
+    memcpy(nptr, old_ptr, size);
     return nptr;
 }
 
