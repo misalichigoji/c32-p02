@@ -216,9 +216,21 @@ void mm_free(void *ptr) {
  * If size is 0, behaves like mm_free(old_ptr) and returns NULL.
  */
 void *mm_realloc(void *old_ptr, size_t size) {
-    (void) old_ptr;
-    (void) size;
-    return NULL;
+    if(size == 0)
+        {
+            mm_free(old_ptr);
+            return NULL;
+        }
+
+    if(old_ptr == NULL)
+        return mm_malloc(size);
+
+    void * nptr = mm_malloc(size);
+    size_t old_size = get_payload_size(old_ptr);
+    if(old_size > size)
+        size = old_size;
+    memccpy(nptr, old_ptr, size);
+    return nptr;
 }
 
 /**
@@ -228,9 +240,11 @@ void *mm_realloc(void *old_ptr, size_t size) {
  * byte set to 0, and returns a pointer to it.
  */
 void *mm_calloc(size_t nmemb, size_t size) {
-    (void) nmemb;
-    (void) size;
-    return NULL;
+    void* nptr = mm_malloc(nmemb * size);
+    if(nptr == NULL)
+        return NULL;
+    memset(nptr, 0, nmemb * size);
+    return nptr;
 }
 
 /**
