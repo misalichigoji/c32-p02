@@ -167,7 +167,19 @@ void *mm_malloc(size_t size) {
     // If there is a large enough free block, use it
     block_t *block = find_fit(size);
     if (block != NULL) {
+        size_t bsize = get_size(block);
+        size_t sizeleft = bsize - size;
+        if(sizeleft >= round_up(1 + sizeof(block_t), ALIGNMENT))
+        {
+            set_header(block, size, true);
+            block_t *next_block = (block_t *)((char *)block + size);
+            set_header(next_block, sizeleft, false);
+        }
+    else
+    {
         set_header(block, get_size(block), true);
+    }   
+        
         return block->payload;
     }
 
@@ -226,10 +238,11 @@ void *mm_realloc(void *old_ptr, size_t size) {
         return mm_malloc(size);
 
     void * nptr = mm_malloc(size);
-    size_t old_size = get_size(block_from_payload(old_ptr));
+    size_t old_size = get_size(block_from_payload(old_ptr)) - sizeof(block_t);
     if(old_size > size)
-        size = old_size;
+        old_size = size;
     memcpy(nptr, old_ptr, size);
+    mm_free(old_ptr);
     return nptr;
 }
 
